@@ -1,0 +1,17 @@
+---
+import Navigation from './navigation.astro';
+import type { NavLink } from './navigation-model';
+
+interface Props {
+  name: string;
+  links: NavLink[];
+}
+const { name, links } = Astro.props;
+---
+
+<header class="border-b border-border">
+  <div class="container-content flex h-16 items-center justify-between gap-6">
+    <a href="/" class="font-semibold tracking-tight" transition:name="site-name">{name}</a>
+    <Navigation links={links} label="Primary" />
+  </div>
+</header>

@@ -1,0 +1,7 @@
+---
+// Preload only the latin subset of the sans face: it is on every page above
+// the fold. The mono face and other subsets load on demand via unicode-range.
+import geistLatin from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
+---
+
+<link rel="preload" href={geistLatin} as="font" type="font/woff2" crossorigin="anonymous" />

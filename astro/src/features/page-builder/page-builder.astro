@@ -1,0 +1,54 @@
+---
+import ArticleList from './sections/article-list.astro';
+import ContactForm from './sections/contact-form.astro';
+import Cta from './sections/cta.astro';
+import Faq from './sections/faq.astro';
+import Hero from './sections/hero.astro';
+import ImageText from './sections/image-text.astro';
+import LogoGrid from './sections/logo-grid.astro';
+import Media from './sections/media.astro';
+import RichText from './sections/rich-text.astro';
+import type { PageBuilderSections, SectionType } from './types';
+
+interface Props {
+  sections: PageBuilderSections | null | undefined;
+  /** Path of the page, forwarded to sections that need it (forms, params links). */
+  path: string;
+}
+
+const { sections, path } = Astro.props;
+
+/**
+ * The renderer map: one .astro component per section type, keyed by `_type`.
+ * `npm run plop section` adds a line here. Keep it exhaustive; the
+ * `satisfies` check fails the build when a section has no renderer.
+ */
+const renderers = {
+  sectionHero: Hero,
+  sectionRichText: RichText,
+  sectionImageText: ImageText,
+  sectionCta: Cta,
+  sectionLogoGrid: LogoGrid,
+  sectionFaq: Faq,
+  sectionContactForm: ContactForm,
+  sectionArticleList: ArticleList,
+  sectionMedia: Media,
+  // plop:section-renderer
+} satisfies Record<SectionType, unknown>;
+
+type Renderer = (props: Record<string, unknown>) => unknown;
+
+// The map value is a union of components; widen it to a generic renderer so
+// the spread type-checks. Each section file types its own Props.
+function rendererFor(type: SectionType): Renderer | undefined {
+  return renderers[type] as unknown as Renderer | undefined;
+}
+---
+
+{
+  (sections ?? []).map((section, index) => {
+    const Section = rendererFor(section._type);
+    if (!Section) return null;
+    return <Section {...section} path={path} index={index} />;
+  })
+}

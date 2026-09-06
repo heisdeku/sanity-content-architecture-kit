@@ -1,0 +1,31 @@
+---
+import { PortableText } from 'astro-portabletext';
+import { cn } from '@/features/style/cn';
+import ImageBlock from './image-block.astro';
+import LinkMark from './link-mark.astro';
+import MediaBlock from './media-block.astro';
+
+/**
+ * Renders an appRichText (Portable Text) array with astro-portabletext.
+ * Link annotations (`link` markDefs, resolved with LINK_FRAGMENT) go
+ * through the single link resolver; inline media uses the same Media
+ * renderer as sections.
+ */
+interface Props {
+  value: unknown;
+  class?: string;
+}
+const { value, class: className } = Astro.props;
+const components = {
+  mark: { link: LinkMark },
+  type: { appMedia: MediaBlock, appImage: ImageBlock },
+};
+---
+
+{
+  Array.isArray(value) && value.length > 0 && (
+    <div class={cn('rich-text', className)}>
+      <PortableText value={value as never} components={components} onMissingComponent={false} />
+    </div>
+  )
+}

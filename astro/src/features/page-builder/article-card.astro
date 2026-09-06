@@ -1,0 +1,34 @@
+---
+import { formatDate, toIsoDate } from '@/features/utils/format-date';
+import { transitionName } from '@/features/view-transition/transition-names';
+import Media from './media.astro';
+import type { ArticleCardData } from './types';
+
+interface Props {
+  article: ArticleCardData;
+}
+const { article } = Astro.props;
+const href = `/articles/${article.slug}`;
+---
+
+<article class="group grid gap-4">
+  {
+    article.cover && (
+      <a href={href} tabindex="-1" aria-hidden="true" class="overflow-hidden rounded-lg bg-muted-background">
+        <div transition:name={transitionName('article-cover', article.slug ?? article._id)}>
+          <Media media={article.cover} sizes="(min-width: 768px) 33vw, 100vw" maxWidth={1024} />
+        </div>
+      </a>
+    )
+  }
+  <div class="grid gap-2">
+    <p class="text-xs text-muted">
+      {article.publishedAt && <time datetime={toIsoDate(article.publishedAt)}>{formatDate(article.publishedAt)}</time>}
+      {article.categories?.length ? ` · ${article.categories.map((c) => c.title).join(', ')}` : ''}
+    </p>
+    <h3 class="text-xl font-semibold tracking-tight" transition:name={transitionName('article-title', article.slug ?? article._id)}>
+      <a href={href} class="hover:underline underline-offset-4">{article.title}</a>
+    </h3>
+    {article.excerpt && <p class="text-muted">{article.excerpt}</p>}
+  </div>
+</article>

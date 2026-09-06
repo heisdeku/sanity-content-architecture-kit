@@ -1,0 +1,20 @@
+---
+import { env } from '@/env';
+import BaseLayout from '@/layouts/base-layout.astro';
+import { buildMetadata } from '@/features/site/metadata';
+import { loadPageContext } from '@/features/site/page-context';
+
+const path = Astro.url.pathname;
+const { chrome, defaults } = await loadPageContext(Astro);
+// Fetch documents with trySanityFetch({ query, params, tags, draft, cache: Astro.cache })
+// and add their tags with Astro.cache.set({ tags: documentTags(doc, path) }).
+const meta = buildMetadata({ site: defaults, doc: { title: '{{titleCase path}}' }, path, baseUrl: env.PUBLIC_URL });
+---
+
+<BaseLayout meta={meta} chrome={chrome}>
+  <section class="section-spacing">
+    <div class="container-prose">
+      <h1 class="text-4xl font-semibold tracking-tight">{{titleCase path}}</h1>
+    </div>
+  </section>
+</BaseLayout>

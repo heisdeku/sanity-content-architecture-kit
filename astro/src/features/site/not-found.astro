@@ -1,0 +1,26 @@
+---
+import RichText from '@/features/rich-text/rich-text.astro';
+import { resolveLink } from '@/features/sanity/resolve-link';
+import type { SiteData } from './site-data';
+
+interface Props {
+  notFound: SiteData['notFound'] | null | undefined;
+}
+const { notFound } = Astro.props;
+const link = resolveLink(notFound?.link);
+---
+
+<section class="container-prose section-spacing grid gap-6">
+  <p class="text-sm uppercase tracking-wide text-muted">404</p>
+  <h1 class="text-4xl font-semibold tracking-tight">{notFound?.title ?? 'Page not found'}</h1>
+  {
+    notFound?.description ? (
+      <RichText value={notFound.description} class="text-muted" />
+    ) : (
+      <p class="text-muted">The page you are looking for does not exist or has moved.</p>
+    )
+  }
+  <p>
+    <a href={link?.href ?? '/'} class="underline underline-offset-4">{link?.label ?? 'Back to the homepage'}</a>
+  </p>
+</section>

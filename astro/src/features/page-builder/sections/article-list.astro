@@ -1,0 +1,23 @@
+---
+import ArticleCard from '../article-card.astro';
+import Heading from '../heading.astro';
+import type { SectionOf } from '../types';
+
+interface Props extends SectionOf<'sectionArticleList'> {
+  path: string;
+  index: number;
+}
+const { heading, articles } = Astro.props;
+---
+
+<section class="section-spacing">
+  <div class="container-content grid gap-8">
+    <div class="flex items-end justify-between gap-4">
+      <Heading heading={heading} />
+      <a href="/articles" class="text-sm text-muted underline underline-offset-4 hover:text-foreground">All articles</a>
+    </div>
+    <div class="grid gap-8 md:grid-cols-3">
+      {(articles ?? []).map((article) => <ArticleCard article={article} />)}
+    </div>
+  </div>
+</section>

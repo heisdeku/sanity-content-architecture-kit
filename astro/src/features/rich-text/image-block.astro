@@ -1,0 +1,36 @@
+---
+import type { Props as PortableTextProps } from 'astro-portabletext/types';
+import { imageSources } from '@/features/sanity/image';
+
+type ImageNode = {
+  _type: 'appImage';
+  alt?: string | null;
+  asset?: { _id: string; url?: string | null } | null;
+  width?: number | null;
+  height?: number | null;
+  aspectRatio?: number | null;
+};
+type Props = PortableTextProps<ImageNode>;
+const { node } = Astro.props;
+const sources = node.asset ? imageSources(node, { maxWidth: 1344 }) : null;
+const ratio = node.aspectRatio ?? (node.width && node.height ? node.width / node.height : 16 / 9);
+---
+
+{
+  sources && (
+    <figure>
+      <img
+        src={sources.src}
+        srcset={sources.srcset}
+        sizes="(min-width: 768px) 42rem, 100vw"
+        width={node.width ?? undefined}
+        height={node.height ?? undefined}
+        alt={node.alt ?? ''}
+        loading="lazy"
+        decoding="async"
+        class="rounded-lg"
+        style={`aspect-ratio: ${ratio};`}
+      />
+    </figure>
+  )
+}

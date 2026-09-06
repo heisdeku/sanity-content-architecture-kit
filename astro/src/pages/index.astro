@@ -1,0 +1,33 @@
+---
+import { HOMEPAGE_QUERY } from '@studio/queries/documents/homepage';
+import { env } from '@/env';
+import PageBuilder from '@/features/page-builder/page-builder.astro';
+import { sectionTags } from '@/features/page-builder/section-tags';
+import { trySanityFetch } from '@/features/sanity/fetch';
+import { documentTags, typeTag } from '@/features/sanity/tags';
+import ConnectSanity from '@/features/site/connect-sanity.astro';
+import { buildMetadata } from '@/features/site/metadata';
+import { loadPageContext } from '@/features/site/page-context';
+import BaseLayout from '@/layouts/base-layout.astro';
+
+const { draft, site, chrome, defaults } = await loadPageContext(Astro);
+const { data: page, error } = await trySanityFetch({
+  query: HOMEPAGE_QUERY,
+  tags: [typeTag('homepage')],
+  draft,
+  cache: Astro.cache,
+});
+if (page) Astro.cache.set({ tags: [...documentTags(page, '/'), ...sectionTags(page.pageBuilder)] });
+
+const meta = buildMetadata({ site: defaults, doc: page, path: '/', baseUrl: env.PUBLIC_URL });
+---
+
+<BaseLayout meta={meta} chrome={chrome}>
+  {
+    page ? (
+      <PageBuilder sections={page.pageBuilder} path="/" />
+    ) : (
+      <ConnectSanity reason={error ?? (site ? 'no homepage document yet' : undefined)} />
+    )
+  }
+</BaseLayout>

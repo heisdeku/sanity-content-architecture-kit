@@ -1,0 +1,18 @@
+---
+import RichText from '@/features/rich-text/rich-text.astro';
+import Heading from '../heading.astro';
+import type { SectionOf } from '../types';
+
+interface Props extends SectionOf<'{{sectionType name}}'> {
+  path: string;
+  index: number;
+}
+const { heading, body } = Astro.props;
+---
+
+<section class="section-spacing">
+  <div class="container-prose grid gap-6">
+    <Heading heading={heading} />
+    <RichText value={body} />
+  </div>
+</section>

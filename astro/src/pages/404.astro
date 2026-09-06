@@ -1,0 +1,25 @@
+---
+import { env } from '@/env';
+import ConnectSanity from '@/features/site/connect-sanity.astro';
+import { buildMetadata } from '@/features/site/metadata';
+import NotFound from '@/features/site/not-found.astro';
+import { loadPageContext } from '@/features/site/page-context';
+import BaseLayout from '@/layouts/base-layout.astro';
+
+// A genuine 404 status, set before any HTML streams. Content comes from
+// site.notFound with a static fallback when Sanity is unreachable.
+Astro.response.status = 404;
+Astro.response.statusText = 'Not Found';
+
+const { site, siteError, chrome, defaults } = await loadPageContext(Astro);
+const meta = buildMetadata({
+  site: defaults,
+  doc: { title: site?.notFound?.title ?? 'Page not found', seo: { noIndex: true } },
+  path: Astro.originPathname,
+  baseUrl: env.PUBLIC_URL,
+});
+---
+
+<BaseLayout meta={meta} chrome={chrome}>
+  {siteError ? <ConnectSanity reason={siteError} /> : <NotFound notFound={site?.notFound} />}
+</BaseLayout>

@@ -1,0 +1,23 @@
+---
+import type { MarkProps } from 'astro-portabletext/types';
+import { type LinkLike, resolveLink } from '@/features/sanity/resolve-link';
+
+type Props = MarkProps<LinkLike>;
+const { node } = Astro.props;
+const link = resolveLink(node.markDef, { currentPath: Astro.url.pathname });
+---
+
+{
+  link ? (
+    <a
+      href={link.href}
+      target={link.newTab ? '_blank' : undefined}
+      rel={link.newTab ? 'noopener noreferrer' : undefined}
+      download={link.download}
+    >
+      <slot />
+    </a>
+  ) : (
+    <slot />
+  )
+}

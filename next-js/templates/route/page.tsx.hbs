@@ -1,0 +1,30 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { PageBuilder } from "@/features/page-builder/page-builder";
+import { safe, sanityFetch } from "@/features/sanity/fetch";
+import { docTags } from "@/features/sanity/tags";
+import { getSite } from "@/features/site/get-site";
+import { buildMetadata } from "@/features/site/metadata";
+import { {{query}} } from "@/sanity/queries/documents/{{queryFile}}";
+
+const path = "/{{path}}";
+
+async function load() {
+  const { data } = await safe(sanityFetch({ query: {{query}}, params: {}, tags: docTags({ type: "page", path }) }));
+  return data;
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [site, page] = await Promise.all([getSite(), load()]);
+  return buildMetadata({ site, seo: page?.seo, title: page?.title, path });
+}
+
+export default async function Page() {
+  const page = await load();
+  if (!page) notFound();
+  return (
+    <main>
+      <PageBuilder sections={page.pageBuilder} />
+    </main>
+  );
+}

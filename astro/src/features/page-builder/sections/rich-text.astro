@@ -1,0 +1,16 @@
+---
+import RichText from '@/features/rich-text/rich-text.astro';
+import type { SectionOf } from '../types';
+
+interface Props extends SectionOf<'sectionRichText'> {
+  path: string;
+  index: number;
+}
+const { body } = Astro.props;
+---
+
+<section class="section-spacing">
+  <div class="container-prose">
+    <RichText value={body} />
+  </div>
+</section>

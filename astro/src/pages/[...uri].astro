@@ -1,0 +1,41 @@
+---
+import { normalizePath } from '@studio/lib/document-path';
+import { PAGE_BY_URI_QUERY } from '@studio/queries/documents/page';
+import { env } from '@/env';
+import PageBuilder from '@/features/page-builder/page-builder.astro';
+import { sectionTags } from '@/features/page-builder/section-tags';
+import { trySanityFetch } from '@/features/sanity/fetch';
+import { documentTags } from '@/features/sanity/tags';
+import { buildMetadata } from '@/features/site/metadata';
+import { loadPageContext } from '@/features/site/page-context';
+import { transitionName } from '@/features/view-transition/transition-names';
+import BaseLayout from '@/layouts/base-layout.astro';
+
+// Page documents own their full path (`uri`). Unknown paths become real 404s
+// (status set by the 404 route) so agents never receive a 200 shell.
+const uri = normalizePath(`/${Astro.params.uri ?? ''}`);
+const { draft, chrome, defaults } = await loadPageContext(Astro);
+const { data: page } = await trySanityFetch({
+  query: PAGE_BY_URI_QUERY,
+  params: { uri },
+  tags: [`path:${uri}`],
+  draft,
+  cache: Astro.cache,
+});
+
+// No document, or Sanity unreachable: a real 404 (never cached when unreachable).
+if (!page) return Astro.rewrite('/404');
+if (page) Astro.cache.set({ tags: [...documentTags(page, uri), ...sectionTags(page.pageBuilder)] });
+
+const meta = buildMetadata({ site: defaults, doc: page, path: uri, baseUrl: env.PUBLIC_URL });
+---
+
+<BaseLayout meta={meta} chrome={chrome}>
+  {
+    page && (
+      <div transition:name={transitionName('page-title', page._id)}>
+        <PageBuilder sections={page.pageBuilder} path={uri} />
+      </div>
+    )
+  }
+</BaseLayout>

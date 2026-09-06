@@ -1,0 +1,14 @@
+import { Heading } from "@/features/page-builder/heading";
+import { Section } from "@/features/page-builder/section";
+import { RichText } from "@/features/rich-text/rich-text";
+import type { {{pascalCase name}}Section } from "@/features/sanity/types";
+
+export function {{pascalCase name}}({ section }: { section: {{pascalCase name}}Section }) {
+  return (
+    <Section type={section._type}>
+      {section.eyebrow ? <p className="eyebrow">{section.eyebrow}</p> : null}
+      <Heading heading={section.heading} className="mt-3" />
+      <RichText value={section.description} className="mt-5 text-muted-foreground" />
+    </Section>
+  );
+}

@@ -1,0 +1,32 @@
+---
+import { LEGAL_BY_SLUG_QUERY } from '@studio/queries/documents/legal';
+import { env } from '@/env';
+import LegalPage from '@/features/legal/legal-page.astro';
+import { sectionTags } from '@/features/page-builder/section-tags';
+import { trySanityFetch } from '@/features/sanity/fetch';
+import { documentTags } from '@/features/sanity/tags';
+import { buildMetadata } from '@/features/site/metadata';
+import { loadPageContext } from '@/features/site/page-context';
+import BaseLayout from '@/layouts/base-layout.astro';
+
+const slug = Astro.params.slug ?? '';
+const path = `/legal/${slug}`;
+const { draft, chrome, defaults } = await loadPageContext(Astro);
+const { data: page } = await trySanityFetch({
+  query: LEGAL_BY_SLUG_QUERY,
+  params: { slug },
+  tags: [`path:${path}`],
+  draft,
+  cache: Astro.cache,
+});
+// No document, or Sanity unreachable: a real 404 (never cached when unreachable).
+if (!page) return Astro.rewrite('/404');
+if (page)
+  Astro.cache.set({ tags: [...documentTags(page, path), ...sectionTags(page.pageBuilder)] });
+
+const meta = buildMetadata({ site: defaults, doc: page, path, baseUrl: env.PUBLIC_URL });
+---
+
+<BaseLayout meta={meta} chrome={chrome}>
+  {page && <LegalPage page={page} />}
+</BaseLayout>

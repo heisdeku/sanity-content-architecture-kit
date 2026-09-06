@@ -1,0 +1,32 @@
+---
+import RichText from '@/features/rich-text/rich-text.astro';
+import Heading from '../heading.astro';
+import type { SectionOf } from '../types';
+
+interface Props extends SectionOf<'sectionFaq'> {
+  path: string;
+  index: number;
+}
+const { heading, items } = Astro.props;
+---
+
+<section class="section-spacing">
+  <div class="container-prose grid gap-8">
+    <Heading heading={heading} />
+    <div class="divide-y divide-border border-y border-border">
+      {
+        (items ?? []).map((item) => (
+          <details class="group py-4">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
+              {item.question}
+              <span aria-hidden="true" class="text-muted transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div class="pt-3 text-muted">
+              <RichText value={item.answer} />
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>

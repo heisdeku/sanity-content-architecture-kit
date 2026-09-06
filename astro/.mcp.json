@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"]
+    },
+    "sanity": {
+      "command": "npx",
+      "args": ["-y", "@sanity/mcp-server@latest"],
+      "env": {
+        "SANITY_PROJECT_ID": "${PUBLIC_SANITY_PROJECT_ID}",
+        "SANITY_DATASET": "${PUBLIC_SANITY_DATASET}",
+        "SANITY_API_TOKEN": "${SANITY_API_EDIT_TOKEN}"
+      }
+    }
+  }
+}

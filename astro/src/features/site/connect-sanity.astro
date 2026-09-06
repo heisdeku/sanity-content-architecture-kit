@@ -1,0 +1,23 @@
+---
+// Empty state rendered when Sanity is unreachable or unconfigured (for example
+// the placeholder project id from .env.example). Never a 500.
+interface Props {
+  reason?: string | undefined;
+}
+const { reason } = Astro.props;
+---
+
+<section class="container-prose section-spacing">
+  <p class="text-sm uppercase tracking-wide text-muted">Content Architecture Kit</p>
+  <h1 class="mt-3 text-3xl font-semibold tracking-tight">Connect Sanity to see content here</h1>
+  <p class="mt-4 text-muted">
+    This route renders documents from your Sanity dataset. The request could not be served
+    {reason ? ` (${reason})` : ''}, which usually means the project id in <code>.env</code> is
+    still the placeholder.
+  </p>
+  <ol class="mt-6 list-decimal space-y-2 pl-5">
+    <li>Run <code>npm run sanity:project-setup</code> to create a project, tokens, webhook and seed data.</li>
+    <li>Or copy your project id and dataset into <code>.env</code> as <code>PUBLIC_SANITY_PROJECT_ID</code> and <code>PUBLIC_SANITY_DATASET</code>.</li>
+    <li>Restart <code>npm run dev</code> and open <a class="underline" href="/studio">/studio</a> to add content.</li>
+  </ol>
+</section>

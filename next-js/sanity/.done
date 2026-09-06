@@ -1,0 +1,1 @@
+sanity workspace complete: schema (7 documents, 9 sections, 11 primitives), factories, structure, presentation, queries, typegen (sanity/sanity.types.ts), seed, scripts, docs; biome + tsc clean for sanity/, scripts/, seed/

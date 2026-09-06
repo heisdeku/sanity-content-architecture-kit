@@ -1,0 +1,12 @@
+/* Geist and Geist Mono as variable fonts, self-hosted through fontsource.
+   The @font-face rules (font-display: swap, unicode-range subsets) come from
+   the packages; the stacks below are what the Tailwind theme consumes. */
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+:root {
+  --font-sans-stack:
+    "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono-stack:
+    "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}

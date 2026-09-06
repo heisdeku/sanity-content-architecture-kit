@@ -1,0 +1,23 @@
+---
+import { cn } from '@/features/style/cn';
+import type { HeadingData } from './types';
+
+interface Props {
+  heading: HeadingData | null | undefined;
+  /** Used when the document did not set a level. */
+  fallbackLevel?: 'h1' | 'h2' | 'h3' | 'h4';
+  class?: string;
+}
+
+const { heading, fallbackLevel = 'h2', class: className } = Astro.props;
+const level = (heading?.level ?? fallbackLevel) as 'h1' | 'h2' | 'h3' | 'h4';
+const Tag = level;
+const sizes = {
+  h1: 'text-4xl md:text-6xl font-semibold tracking-tight text-balance',
+  h2: 'text-3xl md:text-4xl font-semibold tracking-tight text-balance',
+  h3: 'text-2xl font-semibold tracking-tight',
+  h4: 'text-xl font-medium',
+};
+---
+
+{heading?.text && <Tag class={cn(sizes[level], className)}>{heading.text}</Tag>}

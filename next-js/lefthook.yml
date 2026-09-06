@@ -1,0 +1,11 @@
+# Git hooks for the Next.js edition. Installed by `npm run prepare`.
+pre-commit:
+  jobs:
+    - name: biome
+      run: npx biome check --staged --write --no-errors-on-unmatched
+      stage_fixed: true
+
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: npx commitlint --edit {1}

@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+/*
+  Design tokens. Neutral palette, editorial rhythm, monospace accents.
+  Dark mode follows prefers-color-scheme; no class toggling needed.
+*/
+:root {
+  --background: #fafaf9;
+  --foreground: #1c1917;
+  --muted: #78716c;
+  --muted-foreground: #57534e;
+  --border: #e7e5e4;
+  --surface: #ffffff;
+  --accent: #1c1917;
+  --accent-foreground: #fafaf9;
+  --ring: #a8a29e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0c0a09;
+    --foreground: #e7e5e4;
+    --muted: #a8a29e;
+    --muted-foreground: #d6d3d1;
+    --border: #292524;
+    --surface: #1c1917;
+    --accent: #fafaf9;
+    --accent-foreground: #0c0a09;
+    --ring: #57534e;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-sans-family), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    var(--font-mono-family), ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Section rhythm. Sections use `.section-y`; the page builder adds nothing else. */
+  --spacing-section-sm: 3rem;
+  --spacing-section: 5rem;
+  --spacing-section-lg: 8rem;
+
+  /* Container widths. */
+  --container-prose: 42rem;
+  --container-content: 64rem;
+  --container-wide: 80rem;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply tracking-tight text-balance;
+  }
+
+  ::selection {
+    @apply bg-accent text-accent-foreground;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@utility container-x {
+  @apply mx-auto w-full max-w-(--container-wide) px-5 sm:px-8;
+}
+
+@utility container-content {
+  @apply mx-auto w-full max-w-(--container-content) px-5 sm:px-8;
+}
+
+@utility container-prose {
+  @apply mx-auto w-full max-w-(--container-prose) px-5 sm:px-8;
+}
+
+@utility section-y {
+  @apply py-(--spacing-section-sm) md:py-(--spacing-section) xl:py-(--spacing-section-lg);
+}
+
+@utility eyebrow {
+  @apply font-mono text-xs uppercase tracking-[0.18em] text-muted;
+}
+
+/* Prose defaults for rich text. Kept small on purpose; extend in features/rich-text. */
+@utility prose-editorial {
+  @apply text-base leading-7 text-foreground;
+
+  & > * + * {
+    margin-top: 1.25em;
+  }
+  & h2 {
+    @apply mt-12 text-2xl font-semibold;
+  }
+  & h3 {
+    @apply mt-8 text-xl font-semibold;
+  }
+  & a {
+    @apply underline decoration-muted underline-offset-4 hover:decoration-foreground;
+  }
+  & ul,
+  & ol {
+    @apply pl-5;
+  }
+  & ul {
+    @apply list-disc;
+  }
+  & ol {
+    @apply list-decimal;
+  }
+  & li + li {
+    margin-top: 0.4em;
+  }
+  & blockquote {
+    @apply border-l-2 border-border pl-4 text-muted-foreground;
+  }
+  & code {
+    @apply rounded-sm bg-surface px-1 py-0.5 font-mono text-[0.9em];
+  }
+  & figure {
+    @apply my-8;
+  }
+}
+
+/* Route transitions: subtle crossfade. See features/view-transition. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
+}

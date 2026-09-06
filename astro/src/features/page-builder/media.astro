@@ -1,0 +1,121 @@
+---
+import { muxPosterUrl } from '@/features/mux/mux-urls';
+import { MuxVideo } from '@/features/mux/mux-video';
+import { imageSources, urlFor } from '@/features/sanity/image';
+import { cn } from '@/features/style/cn';
+import { LottiePlayer } from './lottie-player';
+import { RivePlayer } from './rive-player';
+import type { MediaData } from './types';
+
+/**
+ * Renders an appMedia by kind. The box is always reserved from the CMS
+ * dimensions (width, height, aspectRatio are present for every kind) so
+ * nothing shifts when the asset arrives. customRatio crops images and
+ * overrides the reserved ratio for every kind.
+ */
+/** MediaData minus the array key so inline rich-text media (no _key) fits too. */
+export type MediaLike = Omit<MediaData, '_key'>;
+
+interface Props {
+  media: MediaLike | null | undefined;
+  sizes?: string;
+  priority?: boolean;
+  class?: string;
+  maxWidth?: number;
+}
+
+const { media, sizes = '100vw', priority = false, class: className, maxWidth = 1920 } = Astro.props;
+
+function parseRatio(value: string | null | undefined): number | null {
+  const match = value ? /^(\d+):(\d+)$/.exec(value) : null;
+  return match ? Number(match[1]) / Number(match[2]) : null;
+}
+
+const customRatio = parseRatio(media?.customRatio);
+const intrinsicRatio =
+  media?.aspectRatio ?? (media?.width && media?.height ? media.width / media.height : null);
+const ratio = customRatio ?? intrinsicRatio ?? 16 / 9;
+const style = `aspect-ratio: ${ratio};`;
+
+let image: { src: string; srcset: string; width: number; height: number } | null = null;
+if (media?.kind === 'image' && media.image?.asset) {
+  const width = Math.min(media.width ?? maxWidth, maxWidth);
+  const height = Math.round(width / ratio);
+  if (customRatio) {
+    const src = urlFor(media.image).width(width).height(height).fit('crop').url();
+    const srcset = [480, 768, 1024, 1280, 1920]
+      .filter((w) => w <= width)
+      .map(
+        (w) =>
+          `${urlFor(media.image as never)
+            .width(w)
+            .height(Math.round(w / ratio))
+            .fit('crop')
+            .url()} ${w}w`,
+      )
+      .join(', ');
+    image = { src, srcset: srcset || `${src} ${width}w`, width, height };
+  } else {
+    const sources = imageSources(media.image, { maxWidth: width });
+    image = { ...sources, width, height };
+  }
+}
+const alt = media?.alt ?? '';
+const video = media?.kind === 'video' ? media.video : null;
+const poster = video?.poster?.asset
+  ? urlFor(video.poster).width(1600).url()
+  : video?.playbackId
+    ? muxPosterUrl(video.playbackId, { time: video.thumbnailTime ?? 0 })
+    : undefined;
+---
+
+{
+  media?.kind === 'image' && image && (
+    <img
+      src={image.src}
+      srcset={image.srcset}
+      sizes={sizes}
+      width={image.width}
+      height={image.height}
+      alt={alt}
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : undefined}
+      decoding="async"
+      class={cn('block h-auto w-full object-cover', className)}
+      style={style}
+    />
+  )
+}
+{
+  media?.kind === 'video' && video?.playbackId && (
+    <div class={cn('w-full overflow-hidden', className)} style={style}>
+      <MuxVideo
+        client:visible
+        playbackId={video.playbackId}
+        title={video.title ?? undefined}
+        poster={poster}
+        aspectRatio={ratio}
+        background={Boolean(video.background)}
+      />
+    </div>
+  )
+}
+{
+  media?.kind === 'lottie' && media.lottie?.url && (
+    <div class={cn('w-full', className)} style={style}>
+      <LottiePlayer client:visible src={media.lottie.url} aspectRatio={ratio} loop={media.lottie.loop ?? true} />
+    </div>
+  )
+}
+{
+  media?.kind === 'rive' && media.rive?.url && (
+    <div class={cn('w-full', className)} style={style}>
+      <RivePlayer
+        client:visible
+        src={media.rive.url}
+        aspectRatio={ratio}
+        stateMachine={media.rive.stateMachine ?? undefined}
+      />
+    </div>
+  )
+}

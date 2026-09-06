@@ -1,0 +1,29 @@
+---
+import { env } from '@/env';
+import { ContactForm as ContactFormIsland } from '@/features/forms/contact-form';
+import RichText from '@/features/rich-text/rich-text.astro';
+import { createTimingToken } from '@/features/spam-prevention/timing-token';
+import Heading from '../heading.astro';
+import type { SectionOf } from '../types';
+
+interface Props extends SectionOf<'sectionContactForm'> {
+  path: string;
+  index: number;
+}
+const { heading, description, successMessage, path } = Astro.props;
+// The token is minted at render time; the API rejects forms sent under 3 s
+// or over 24 h later. Responses with a form are still cacheable: the token's
+// 24 h window is longer than any sensible route cache, and the route cache
+// is busted on publish anyway.
+const token = createTimingToken(env.FORM_SECRET);
+---
+
+<section class="section-spacing">
+  <div class="container-prose grid gap-8">
+    <div class="grid gap-4">
+      <Heading heading={heading} />
+      {description && <RichText value={description} class="text-muted" />}
+    </div>
+    <ContactFormIsland client:visible token={token} page={path} successMessage={successMessage ?? undefined} />
+  </div>
+</section>

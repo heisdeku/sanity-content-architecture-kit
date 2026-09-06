@@ -1,0 +1,23 @@
+import { LayoutTemplate as SectionIcon } from 'lucide-react'
+import { defineType } from 'sanity'
+import { createEyebrowField } from '../fields/create-eyebrow-field'
+import { createHeadingField } from '../fields/create-heading-field'
+import { createRichTextField } from '../fields/create-rich-text-field'
+
+export const {{sectionType name}} = defineType({
+  name: '{{sectionType name}}',
+  title: '{{titleCase name}}',
+  type: 'object',
+  icon: SectionIcon,
+  fields: [
+    createEyebrowField(),
+    createHeadingField({ required: true }),
+    createRichTextField({ name: 'description', title: 'Description', styles: ['normal'], lists: false, allowMedia: false }),
+  ],
+  preview: {
+    select: { title: 'heading.text' },
+    prepare({ title }) {
+      return { title: title || '{{titleCase name}}', subtitle: '{{titleCase name}}' }
+    },
+  },
+})

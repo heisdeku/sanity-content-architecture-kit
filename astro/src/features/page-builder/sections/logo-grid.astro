@@ -1,0 +1,39 @@
+---
+import { resolveLink } from '@/features/sanity/resolve-link';
+import Heading from '../heading.astro';
+import Media from '../media.astro';
+import type { SectionOf } from '../types';
+
+interface Props extends SectionOf<'sectionLogoGrid'> {
+  path: string;
+  index: number;
+}
+const { heading, logos, path } = Astro.props;
+---
+
+<section class="section-spacing">
+  <div class="container-content grid gap-8">
+    <Heading heading={heading} class="text-center" />
+    <ul class="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+      {
+        (logos ?? []).map((logo) => {
+          const link = resolveLink(logo.link, { currentPath: path });
+          const Wrapper = link ? 'a' : 'div';
+          return (
+            <li class="flex items-center justify-center">
+              <Wrapper
+                href={link?.href}
+                target={link?.newTab ? '_blank' : undefined}
+                rel={link?.newTab ? 'noopener noreferrer' : undefined}
+                aria-label={logo.name ?? undefined}
+                class="w-full max-w-36 opacity-70 transition-opacity hover:opacity-100"
+              >
+                <Media media={logo.media} sizes="160px" maxWidth={320} />
+              </Wrapper>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</section>

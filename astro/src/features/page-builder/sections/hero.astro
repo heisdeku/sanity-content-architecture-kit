@@ -1,0 +1,33 @@
+---
+import RichText from '@/features/rich-text/rich-text.astro';
+import AppButton from '../app-button.astro';
+import Heading from '../heading.astro';
+import Media from '../media.astro';
+import type { SectionOf } from '../types';
+
+interface Props extends SectionOf<'sectionHero'> {
+  path: string;
+  index: number;
+}
+const { eyebrow, heading, description, buttons, media, path, index } = Astro.props;
+---
+
+<section class="section-spacing">
+  <div class="container-content grid gap-10 md:grid-cols-2 md:items-center">
+    <div class="grid gap-6">
+      {eyebrow && <p class="text-sm uppercase tracking-wide text-muted">{eyebrow}</p>}
+      <Heading heading={heading} fallbackLevel="h1" />
+      {description && <RichText value={description} class="text-lg text-muted" />}
+      {
+        buttons?.length ? (
+          <div class="flex flex-wrap gap-3">
+            {buttons.map((button) => (
+              <AppButton button={button} currentPath={path} />
+            ))}
+          </div>
+        ) : null
+      }
+    </div>
+    {media && <Media media={media} sizes="(min-width: 768px) 50vw, 100vw" priority={index === 0} class="rounded-lg" />}
+  </div>
+</section>

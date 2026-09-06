@@ -1,0 +1,81 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import { VisualEditing } from '@sanity/astro/visual-editing';
+import { env } from '@/env';
+import DraftModeBanner from '@/features/draft-mode/draft-mode-banner.astro';
+import FontPreload from '@/features/fonts/font-preload.astro';
+import Lenis from '@/features/lenis/lenis.astro';
+import Footer from '@/features/site/footer.astro';
+import Header from '@/features/site/header.astro';
+import { websiteJsonLd } from '@/features/site/json-ld';
+import type { PageMetadata } from '@/features/site/metadata';
+import { EMPTY_CHROME, type SiteChrome } from '@/features/site/navigation-model';
+import Umami from '@/features/umami/umami.astro';
+import '@/styles/globals.css';
+
+interface Props {
+  meta: PageMetadata;
+  chrome?: SiteChrome | null;
+  /** Extra JSON-LD objects (Article etc.). WebSite is always emitted. */
+  jsonLd?: Record<string, unknown>[];
+  /** Skip the site header and footer (404 shells, embeds). */
+  bare?: boolean;
+}
+
+const { meta, chrome = EMPTY_CHROME, jsonLd = [], bare = false } = Astro.props;
+const site = chrome ?? EMPTY_CHROME;
+const draft = Astro.locals.draft;
+const baseUrl = env.PUBLIC_URL;
+const structuredData = [websiteJsonLd(meta, baseUrl), ...jsonLd];
+
+// Every HTML response varies on these so the CDN never hands a cached page to
+// an editor (Cookie), a Basic Auth session (Authorization) or an agent (Accept).
+Astro.response.headers.set('Vary', 'Cookie, Authorization, Accept');
+if (draft || Astro.locals.protectedByBasicAuth) {
+  Astro.response.headers.set('Cache-Control', 'private, no-store');
+  Astro.cache.set(false);
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{meta.title}</title>
+    {meta.description && <meta name="description" content={meta.description} />}
+    <meta name="robots" content={meta.robots} />
+    <link rel="canonical" href={meta.canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={`${meta.siteName} feed`} href="/feed.xml" />
+    <meta property="og:type" content={meta.ogType} />
+    <meta property="og:site_name" content={meta.siteName} />
+    <meta property="og:title" content={meta.title} />
+    {meta.description && <meta property="og:description" content={meta.description} />}
+    <meta property="og:url" content={meta.canonical} />
+    <meta property="og:image" content={meta.ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    {meta.publishedTime && <meta property="article:published_time" content={meta.publishedTime} />}
+    {meta.modifiedTime && <meta property="article:modified_time" content={meta.modifiedTime} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={meta.title} />
+    {meta.description && <meta name="twitter:description" content={meta.description} />}
+    <meta name="twitter:image" content={meta.ogImage} />
+    <FontPreload />
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} is:inline />
+    <ClientRouter />
+    <Umami websiteId={env.PUBLIC_UMAMI_WEBSITE_ID} src={env.PUBLIC_UMAMI_SRC} />
+  </head>
+  <body class="bg-background text-foreground font-sans">
+    <DraftModeBanner enabled={draft} />
+    {!bare && <Header name={site.name} links={site.header} />}
+    <main id="main">
+      <slot />
+    </main>
+    {!bare && <Footer name={site.name} columns={site.footerColumns} social={site.social} />}
+    <Lenis />
+    <VisualEditing enabled={draft} zIndex={1000} />
+  </body>
+</html>

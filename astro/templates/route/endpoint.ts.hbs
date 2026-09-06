@@ -1,0 +1,7 @@
+import type { APIRoute } from 'astro';
+import { apiJson } from '@/features/utils/api-error';
+
+export const GET: APIRoute = async ({ cache }) => {
+  cache.set({ tags: ['type:site'], maxAge: 60 });
+  return apiJson({ ok: true }, { headers: { 'Cache-Control': 'public, max-age=60' } });
+};

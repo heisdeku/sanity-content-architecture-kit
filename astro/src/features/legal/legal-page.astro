@@ -1,0 +1,31 @@
+---
+import type { LEGAL_BY_SLUG_QUERY_RESULT } from '@studio/sanity.types';
+import PageBuilder from '@/features/page-builder/page-builder.astro';
+import RichText from '@/features/rich-text/rich-text.astro';
+import { formatDate, toIsoDate } from '@/features/utils/format-date';
+import { transitionName } from '@/features/view-transition/transition-names';
+
+interface Props {
+  page: NonNullable<LEGAL_BY_SLUG_QUERY_RESULT>;
+}
+const { page } = Astro.props;
+---
+
+<article class="section-spacing">
+  <header class="container-prose grid gap-3">
+    <h1 class="text-4xl font-semibold tracking-tight" transition:name={transitionName('page-title', page.slug ?? page._id)}>
+      {page.title}
+    </h1>
+    {
+      page.lastUpdated && (
+        <p class="text-sm text-muted">
+          Last updated <time datetime={toIsoDate(page.lastUpdated)}>{formatDate(page.lastUpdated)}</time>
+        </p>
+      )
+    }
+  </header>
+  <div class="container-prose mt-10">
+    <RichText value={page.body} />
+  </div>
+</article>
+<PageBuilder sections={page.pageBuilder} path={page.path ?? '/'} />

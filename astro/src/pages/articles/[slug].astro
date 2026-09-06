@@ -1,0 +1,81 @@
+---
+import { ARTICLE_BY_SLUG_QUERY } from '@studio/queries/documents/article';
+import { env } from '@/env';
+import Media from '@/features/page-builder/media.astro';
+import PageBuilder from '@/features/page-builder/page-builder.astro';
+import { sectionTags } from '@/features/page-builder/section-tags';
+import { trySanityFetch } from '@/features/sanity/fetch';
+import { documentTags, typeTag } from '@/features/sanity/tags';
+import { articleJsonLd } from '@/features/site/json-ld';
+import { buildMetadata } from '@/features/site/metadata';
+import { loadPageContext } from '@/features/site/page-context';
+import { formatDate, toIsoDate } from '@/features/utils/format-date';
+import { transitionName } from '@/features/view-transition/transition-names';
+import BaseLayout from '@/layouts/base-layout.astro';
+
+const slug = Astro.params.slug ?? '';
+const path = `/articles/${slug}`;
+const { draft, chrome, defaults } = await loadPageContext(Astro);
+const { data: article } = await trySanityFetch({
+  query: ARTICLE_BY_SLUG_QUERY,
+  params: { slug },
+  tags: [`path:${path}`, typeTag('category')],
+  draft,
+  cache: Astro.cache,
+});
+// No document, or Sanity unreachable: a real 404 (never cached when unreachable).
+if (!article) return Astro.rewrite('/404');
+if (article)
+  Astro.cache.set({ tags: [...documentTags(article, path), ...sectionTags(article.pageBuilder)] });
+
+const meta = buildMetadata({
+  site: defaults,
+  doc: article,
+  path,
+  baseUrl: env.PUBLIC_URL,
+  ogType: 'article',
+});
+const jsonLd = article
+  ? [
+      articleJsonLd(meta, {
+        title: article.title ?? '',
+        author: article.author,
+        publishedAt: article.publishedAt,
+        excerpt: article.excerpt,
+      }),
+    ]
+  : [];
+---
+
+<BaseLayout meta={meta} chrome={chrome} jsonLd={jsonLd}>
+  {
+    article && (
+      <article>
+        <header class="section-spacing">
+          <div class="container-prose grid gap-4">
+            <p class="text-sm text-muted">
+              {article.publishedAt && <time datetime={toIsoDate(article.publishedAt)}>{formatDate(article.publishedAt)}</time>}
+              {article.author ? ` · ${article.author}` : ''}
+              {article.categories?.length ? ` · ${article.categories.map((c) => c.title).join(', ')}` : ''}
+            </p>
+            <h1
+              class="text-4xl font-semibold tracking-tight text-balance md:text-5xl"
+              transition:name={transitionName('article-title', slug)}
+            >
+              {article.title}
+            </h1>
+            {article.excerpt && <p class="text-lg text-muted">{article.excerpt}</p>}
+          </div>
+          {
+            article.cover && (
+              <div class="container-content mt-10" transition:name={transitionName('article-cover', slug)}>
+                <Media media={article.cover} sizes="(min-width: 1088px) 1088px, 100vw" priority class="rounded-lg" />
+              </div>
+            )
+          }
+        </header>
+        <PageBuilder sections={article.pageBuilder} path={path} />
+      </article>
+    )
+  }
+</BaseLayout>

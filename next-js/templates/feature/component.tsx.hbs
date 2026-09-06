@@ -1,0 +1,8 @@
+import type { ReactNode } from "react";
+
+type {{pascalCase name}}Props = { children?: ReactNode };
+
+/** {{titleCase name}} feature entry component. Server component by default. */
+export function {{pascalCase name}}({ children }: {{pascalCase name}}Props) {
+  return <div data-feature="{{kebabCase name}}">{children}</div>;
+}

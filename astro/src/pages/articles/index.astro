@@ -1,0 +1,46 @@
+---
+import { ARTICLES_QUERY } from '@studio/queries/documents/article';
+import { env } from '@/env';
+import ArticleCard from '@/features/page-builder/article-card.astro';
+import { trySanityFetch } from '@/features/sanity/fetch';
+import { typeTag } from '@/features/sanity/tags';
+import ConnectSanity from '@/features/site/connect-sanity.astro';
+import { buildMetadata } from '@/features/site/metadata';
+import { loadPageContext } from '@/features/site/page-context';
+import BaseLayout from '@/layouts/base-layout.astro';
+
+const { draft, chrome, defaults } = await loadPageContext(Astro);
+const { data: articles, error } = await trySanityFetch({
+  query: ARTICLES_QUERY,
+  params: { limit: 100 },
+  tags: [typeTag('article'), typeTag('category')],
+  draft,
+  cache: Astro.cache,
+});
+const meta = buildMetadata({
+  site: defaults,
+  doc: { title: 'Articles' },
+  path: '/articles',
+  baseUrl: env.PUBLIC_URL,
+});
+---
+
+<BaseLayout meta={meta} chrome={chrome}>
+  {
+    articles ? (
+      <section class="section-spacing">
+        <div class="container-content grid gap-10">
+          <h1 class="text-4xl font-semibold tracking-tight">Articles</h1>
+          {articles.length === 0 && <p class="text-muted">No articles published yet.</p>}
+          <div class="grid gap-10 md:grid-cols-3">
+            {articles.map((article) => (
+              <ArticleCard article={article} />
+            ))}
+          </div>
+        </div>
+      </section>
+    ) : (
+      <ConnectSanity reason={error ?? undefined} />
+    )
+  }
+</BaseLayout>

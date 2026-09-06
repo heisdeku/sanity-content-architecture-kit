@@ -1,0 +1,40 @@
+---
+import { resolveLink } from '@/features/sanity/resolve-link';
+import { cn } from '@/features/style/cn';
+import { Icon } from './icon';
+import type { ButtonData } from './types';
+
+interface Props {
+  button: ButtonData;
+  currentPath: string;
+  class?: string;
+}
+
+const { button, currentPath, class: className } = Astro.props;
+const link = resolveLink(button.link, { currentPath });
+const variants = {
+  primary: 'bg-foreground text-background hover:opacity-90',
+  secondary: 'border border-border bg-background hover:bg-muted-background',
+  ghost: 'underline underline-offset-4 hover:text-accent',
+};
+const variant = (button.variant ?? 'primary') as keyof typeof variants;
+---
+
+{
+  link && (
+    <a
+      href={link.href}
+      target={link.newTab ? '_blank' : undefined}
+      rel={link.newTab ? 'noopener noreferrer' : undefined}
+      download={link.download}
+      class={cn(
+        'inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-sm font-medium transition-colors',
+        variants[variant],
+        className,
+      )}
+    >
+      {button.label ?? link.label}
+      {button.icon && <Icon name={button.icon} size={16} />}
+    </a>
+  )
+}

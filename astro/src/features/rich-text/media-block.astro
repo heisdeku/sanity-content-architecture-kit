@@ -1,0 +1,14 @@
+---
+import type { Props as PortableTextProps } from 'astro-portabletext/types';
+import Media from '@/features/page-builder/media.astro';
+import type { MediaData } from '@/features/page-builder/types';
+
+type MediaNode = Omit<MediaData, '_key'> & { _type: 'appMedia'; _key?: string };
+type Props = PortableTextProps<MediaNode>;
+const { node } = Astro.props;
+---
+
+<figure>
+  <Media media={node} sizes="(min-width: 768px) 42rem, 100vw" maxWidth={1344} class="rounded-lg" />
+  {node.alt && node.kind !== 'image' && <figcaption>{node.alt}</figcaption>}
+</figure>

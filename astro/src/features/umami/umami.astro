@@ -1,0 +1,12 @@
+---
+// Umami analytics. Renders nothing unless both PUBLIC_UMAMI_* values exist.
+// The .astro file receives the values as props so islands never read env.
+interface Props {
+  websiteId?: string | undefined;
+  src?: string | undefined;
+}
+const { websiteId, src } = Astro.props;
+const enabled = Boolean(websiteId && src);
+---
+
+{enabled && <script is:inline defer src={src} data-website-id={websiteId} data-astro-rerun />}
